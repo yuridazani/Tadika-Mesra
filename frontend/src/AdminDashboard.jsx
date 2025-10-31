@@ -6,6 +6,19 @@ import { API_URL } from './apiConfig';
 import { Trash2, Edit, X, Save } from 'lucide-react'; 
 import { io } from "socket.io-client"; 
 
+// --- 👇 TAMBAHAN BARU: Komponen Avatar 👇 ---
+// Kita copy dari DashboardPage.jsx
+const Avatar = ({ username }) => {
+  const initial = username ? username.charAt(0).toUpperCase() : '?';
+  return (
+    <div className="flex items-center justify-center w-10 h-10 font-bold text-white rounded-full bg-beaver">
+      {initial}
+    </div>
+  );
+};
+// --- 👆 AKHIR TAMBAHAN 👆 ---
+
+
 // --- Komponen Modal Edit User (Tidak ada perubahan) ---
 const EditUserModal = ({ user, onClose, onUserUpdated }) => {
   const [formData, setFormData] = useState({
@@ -134,6 +147,10 @@ function AdminDashboard({ currentUser, onLogout }) {
   const [editingUser, setEditingUser] = useState(null); 
   const token = localStorage.getItem('app_token'); 
 
+  // --- State untuk form post ---
+  const [postText, setPostText] = useState('');
+  const [postImage, setPostImage] = useState(null);
+
   // Efek untuk mengambil data awal (HTTP)
   useEffect(() => {
     if (!currentUser || !currentUser.is_admin) {
@@ -153,14 +170,6 @@ function AdminDashboard({ currentUser, onLogout }) {
     socket.on('new_post', (newPost) => {
       setAllPosts((currentPosts) => [newPost, ...currentPosts]);
     });
-
-    // --- HAPUS LISTENER post_deleted ---
-    // socket.on('post_deleted', (data) => {
-    //   setAllPosts((currentPosts) =>
-    //     currentPosts.filter(post => post.id !== data.postId)
-    //   );
-    // });
-    // ----------------------------------
 
     return () => {
       socket.disconnect();
@@ -186,18 +195,40 @@ function AdminDashboard({ currentUser, onLogout }) {
     }
   };
 
-  // --- PERBAIKAN DI SINI ---
+  // --- Fungsi submit post ---
+  const handlePostSubmit = async (event) => {
+    event.preventDefault();
+    if (!postText.trim() && !postImage) {
+      alert('Post tidak boleh kosong (teks atau gambar)!');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('text_content', postText);
+    if (postImage) {
+      formData.append('image', postImage);
+    }
+    try {
+      await axios.post(`${API_URL}/`, formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      setPostText('');
+      setPostImage(null);
+      event.target.reset(); 
+    } catch (error) {
+      console.error('Gagal membuat post:', error);
+      alert('Gagal membuat post.');
+    }
+  };
+
   const handleDeletePost = async (postId) => {
     if (window.confirm('Anda yakin ingin menghapus postingan ini? Tindakan ini tidak bisa dibatalkan.')) {
       try {
-        // 1. Kirim permintaan ke server
         await axios.delete(`${API_URL}/admin/posts/${postId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-
-        // 2. SETELAH SUKSES, perbarui state secara manual
         setAllPosts(currentPosts => currentPosts.filter(post => post.id !== postId));
-        
       } catch (error) {
         console.error('Gagal menghapus post:', error);
         alert('Gagal menghapus post: ' + (error.response?.data?.message || 'Error'));
@@ -205,21 +236,15 @@ function AdminDashboard({ currentUser, onLogout }) {
     }
   };
 
-  // --- PERBAIKAN DI SINI ---
   const handleDeleteUser = async (userId, username) => {
     if (window.confirm(`Anda yakin ingin MENGHAPUS user "${username}"? \n\nSemua postingan mereka juga akan terhapus. Tindakan ini tidak bisa dibatalkan!`)) {
       try {
-        // 1. Kirim permintaan ke server
         await axios.delete(`${API_URL}/admin/users/${userId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        
-        // 2. SETELAH SUKSES, perbarui state secara manual
         setAllUsers(currentUsers => currentUsers.filter(user => user.id !== userId));
         setAllPosts(currentPosts => currentPosts.filter(post => post.author !== username));
-        
         alert(`User "${username}" berhasil dihapus.`);
-
       } catch (error) {
         console.error('Gagal menghapus user:', error);
         alert('Gagal menghapus user: ' + (error.response?.data?.message || 'Error'));
@@ -257,20 +282,19 @@ function AdminDashboard({ currentUser, onLogout }) {
         />
       )}
 
-      <h1 className="mb-6 text-4xl font-bold font-playfair text-chocolate-cosmos">
-        Admin Panel
-      </h1>
-      
       {loading ? (
         <p className="text-center text-walnut-brown">Memuat data admin...</p>
       ) : (
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        // --- 👇 PERUBAHAN DI SINI: Kembali ke grid 2 kolom 👇 ---
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
+          {/* --- KOLOM KIRI (ADMIN) --- */}
           <div className="p-6 bg-white rounded-xl shadow-lg">
             <h2 className="text-2xl font-bold text-walnut-brown">
               Daftar Semua User ({allUsers.length})
             </h2>
-            <ul className="mt-4 space-y-3">
+            {/* --- 👇 PERBAIKAN SCROLL: Tambahkan max-h & overflow 👇 --- */}
+            <ul className="mt-4 space-y-3 max-h-[70vh] overflow-y-auto pr-2">
               {allUsers.map((user) => (
                 <li
                   key={user.username}
@@ -306,53 +330,99 @@ function AdminDashboard({ currentUser, onLogout }) {
             </ul>
           </div>
 
-          <div className="p-6 bg-white rounded-xl shadow-lg">
-            <h2 className="text-2xl font-bold text-walnut-brown">
-              Semua Postingan ({allPosts.length})
-            </h2>
-            <div className="mt-4 space-y-4 max-h-[70vh] overflow-y-auto pr-2">
-              {allPosts.map((post) => (
-                <div
-                  key={post.id}
-                  className="relative p-4 border rounded-lg border-beaver/30 bg-white-smoke/50"
-                >
-                  <button
-                    onClick={() => handleDeletePost(post.id)}
-                    className="absolute top-3 right-3 p-1 text-walnut-brown/50 hover:text-red-600 hover:bg-red-100 rounded-full"
-                    title="Hapus postingan (Admin)"
-                  >
-                    <Trash2 size={18} />
-                  </button>
 
-                  <div className="items-center mb-2">
-                    <Link
-                      to={`/profile/${post.author}`}
-                      className="font-bold text-chocolate-cosmos hover:underline"
-                    >
-                      {post.author}
-                    </Link>
-                    <div className="ml-auto text-xs text-walnut-brown/70">
-                      {formatTimestamp(post.created_at)}
-                    </div>
+          <div className="flex flex-col gap-8">
+            
+            {/* --- Form Postingan Admin --- */}
+            <div className="p-6 bg-white shadow-lg rounded-xl">
+              <h2 className="text-2xl font-bold text-walnut-brown mb-4">
+                Buat Postingan / Pengumuman
+              </h2>
+              <div className="flex items-start gap-4">
+                <Avatar username={currentUser.username} />
+                <form onSubmit={handlePostSubmit} className="flex-1">
+                  <textarea
+                    value={postText}
+                    onChange={(e) => setPostText(e.target.value)}
+                    placeholder="Buat pengumuman untuk semua user..."
+                    className="w-full p-3 border rounded-md resize-none border-beaver/50 focus:ring-chocolate-cosmos focus:border-chocolate-cosmos"
+                    rows="3"
+                  ></textarea>
+                  
+                  <div className="mt-2">
+                    <input
+                      type="file"
+                      name="image"
+                      accept="image/*"
+                      onChange={(e) => setPostImage(e.target.files[0])}
+                      className="w-full text-sm rounded-md file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-chocolate-cosmos/10 file:text-chocolate-cosmos hover:file:bg-chocolate-cosmos/20"
+                    />
                   </div>
-                  {post.text_content && (
-                    <p className="text-black-custom whitespace-pre-wrap">
-                      {post.text_content}
-                    </p>
-                  )}
-                  {post.image_url && (
-                    <div className="mt-2">
-                      <img
-                        src={post.image_url}
-                        alt="Lampiran post"
-                        className="object-contain w-full h-auto bg-gray-100 rounded-lg max-h-60"
-                      />
+
+                  <div className="flex justify-end mt-3">
+                    <button
+                      type="submit"
+                      className="px-6 py-2 font-bold text-white transition-transform duration-300 transform bg-chocolate-cosmos rounded-full hover:scale-105 disabled:bg-gray-400"
+                      disabled={!postText.trim() && !postImage}
+                    >
+                      Post
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            {/* --- Panel Timeline Semua Postingan --- */}
+            <div className="p-6 bg-white rounded-xl shadow-lg">
+              <h2 className="text-2xl font-bold text-walnut-brown">
+                Semua Postingan ({allPosts.length})
+              </h2>
+              {/* --- 👇 PERBAIKAN SCROLL: Pastikan max-h ada di sini 👇 --- */}
+              <div className="mt-4 space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+                {allPosts.map((post) => (
+                  <div
+                    key={post.id}
+                    className="relative p-4 border rounded-lg border-beaver/30 bg-white-smoke/50"
+                  >
+                    <button
+                      onClick={() => handleDeletePost(post.id)}
+                      className="absolute top-3 right-3 p-1 text-walnut-brown/50 hover:text-red-600 hover:bg-red-100 rounded-full"
+                      title="Hapus postingan (Admin)"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+
+                    <div className="items-center mb-2">
+                      <Link
+                        to={`/profile/${post.author}`}
+                        className="font-bold text-chocolate-cosmos hover:underline"
+                      >
+                        {post.author}
+                      </Link>
+                      <div className="ml-auto text-xs text-walnut-brown/70">
+                        {formatTimestamp(post.created_at)}
+                      </div>
                     </div>
-                  )}
-                </div>
-              ))}
+                    {post.text_content && (
+                      <p className="text-black-custom whitespace-pre-wrap">
+                        {post.text_content}
+                      </p>
+                    )}
+                    {post.image_url && (
+                      <div className="mt-2">
+                        <img
+                          src={post.image_url}
+                          alt="Lampiran post"
+                          className="object-contain w-full h-auto bg-gray-100 rounded-lg max-h-60"
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
+          {/* --- AKHIR KOLOM KANAN --- */}
         </div>
       )}
     </AdminLayout>

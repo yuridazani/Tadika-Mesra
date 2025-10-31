@@ -32,8 +32,14 @@ function LoginPage({ onLogin }) { // Ambil prop onLogin dari App.jsx
       // 2. Kirim data user (termasuk is_admin) ke App.jsx
       onLogin(user);
 
-      // 3. SELALU arahkan ke dashboard biasa
-      navigate('/dashboard');
+      // --- 👇 PERUBAHAN UTAMA ADA DI SINI 👇 ---
+      // 3. Arahkan berdasarkan role user
+      if (user.is_admin) {
+        navigate('/admin'); // <-- KIRIM ADMIN KE SINI
+      } else {
+        navigate('/dashboard'); // <-- KIRIM USER BIASA KE SINI
+      }
+      // --- 👆 AKHIR DARI PERUBAHAN 👆 ---
       
     } catch (error) {
       console.error('Error login:', error);

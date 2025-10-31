@@ -26,18 +26,7 @@ function AdminLayout({ user, onLogout, children }) {
           </Link>
 
           <div className="flex items-center gap-6">
-            
-            {/* --- TOMBOL KEMBALI KE DASHBOARD (BARU) --- */}
-            <Link
-              to="/dashboard"
-              className="flex items-center gap-2 font-semibold transition-colors text-walnut-brown hover:text-chocolate-cosmos"
-            >
-              <LayoutDashboard size={18} />
-              Dashboard
-            </Link>
-            {/* ----------------------------------------- */}
-
-            <button
+           <button
               onClick={handleLogoutClick}
               className="flex items-center gap-2 font-semibold transition-colors text-walnut-brown hover:text-red-600"
             >

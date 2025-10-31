@@ -26,11 +26,19 @@ function DashboardPage({ user, onLogout }) {
   useEffect(() => {
     if (!user) {
       navigate('/login');
-    } else {
+    } 
+    // --- 👇 TAMBAHAN KODE DI SINI 👇 ---
+    else if (user.is_admin) {
+      // Jika user adalah admin, "usir" mereka ke panel admin.
+      // Dashboard ini hanya untuk user biasa.
+      navigate('/admin');
+    } 
+    // --- 👆 AKHIR TAMBAHAN 👆 ---
+    else {
       setLoading(true); 
       fetchPosts();
     }
-  }, [user, navigate]); 
+  }, [user, navigate]); // user dan navigate sudah ada di dependencies
 
   // Efek 2: Koneksi Socket.io
   useEffect(() => {
@@ -42,14 +50,11 @@ function DashboardPage({ user, onLogout }) {
       setPosts((currentPosts) => [newPost, ...currentPosts]);
     });
 
-    // --- PERBAIKAN DI SINI ---
     socket.on('post_deleted', (data) => {
       setPosts((currentPosts) => 
-        // Gunakan != untuk membandingkan Angka (post.id) dengan Teks (data.postId)
         currentPosts.filter(post => post.id != data.postId)
       );
     });
-    // -------------------------
 
     return () => {
       socket.disconnect();
@@ -86,7 +91,6 @@ function DashboardPage({ user, onLogout }) {
           'Authorization': `Bearer ${token}`,
         },
       });
-      // Biarkan socket.on('new_post') yang menangani
       setPostText('');
       setPostImage(null);
       event.target.reset(); 
@@ -96,7 +100,11 @@ function DashboardPage({ user, onLogout }) {
     }
   };
 
-  if (!user) return null; 
+  // --- 👇 TAMBAHAN KODE DI SINI 👇 ---
+  // Jika user adalah admin, component akan redirect, 
+  // jadi kita return null lebih awal agar tidak render sisanya.
+  if (!user || user.is_admin) return null; 
+  // --- 👆 AKHIR TAMBAHAN 👆 ---
 
   const formatTimestamp = (date) =>
     new Date(date).toLocaleString('id-ID', {
