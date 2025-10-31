@@ -2,8 +2,6 @@
 -- PostgreSQL database dump
 --
 
-\restrict WjyEBWkJ47R0RMvekholYLfj7HaKekShxHDLMmoDGlYqBbklDAhRHM2473j8x7h
-
 -- Dumped from database version 18.0
 -- Dumped by pg_dump version 18.0
 
@@ -216,6 +214,3 @@ ALTER TABLE ONLY public.posts
 --
 -- PostgreSQL database dump complete
 --
-
-\unrestrict WjyEBWkJ47R0RMvekholYLfj7HaKekShxHDLMmoDGlYqBbklDAhRHM2473j8x7h
-
