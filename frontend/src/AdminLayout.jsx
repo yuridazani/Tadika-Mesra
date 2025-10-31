@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, Shield } from 'lucide-react';
+// Impor icon 'LayoutDashboard'
+import { LogOut, Shield, LayoutDashboard } from 'lucide-react';
 
 function AdminLayout({ user, onLogout, children }) {
   const navigate = useNavigate();
@@ -25,9 +26,17 @@ function AdminLayout({ user, onLogout, children }) {
           </Link>
 
           <div className="flex items-center gap-6">
-            <span className="font-semibold text-beaver">
-              Logged in as: {user.username}
-            </span>
+            
+            {/* --- TOMBOL KEMBALI KE DASHBOARD (BARU) --- */}
+            <Link
+              to="/dashboard"
+              className="flex items-center gap-2 font-semibold transition-colors text-walnut-brown hover:text-chocolate-cosmos"
+            >
+              <LayoutDashboard size={18} />
+              Dashboard
+            </Link>
+            {/* ----------------------------------------- */}
+
             <button
               onClick={handleLogoutClick}
               className="flex items-center gap-2 font-semibold transition-colors text-walnut-brown hover:text-red-600"

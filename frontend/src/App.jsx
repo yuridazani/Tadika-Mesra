@@ -6,87 +6,52 @@ import LoginPage from './LoginPage';
 import DashboardPage from './DashboardPage';
 import ProfilePage from './ProfilePage';
 import AdminDashboard from './AdminDashboard';
+import { jwtDecode } from 'jwt-decode'; // Impor jwt-decode
 
 function App() {
-  const [users, setUsers] = useState(() => {
-    const savedUsers = localStorage.getItem('app_users');
-    return savedUsers ? JSON.parse(savedUsers) : [];
-  });
+  // State untuk menyimpan data user yang sedang login
+  const [currentUser, setCurrentUser] = useState(null);
 
-  const [currentUser, setCurrentUser] = useState(() => {
-    const savedUser = localStorage.getItem('app_currentUser');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
-
-  const [posts, setPosts] = useState(() => {
-    const savedPosts = localStorage.getItem('app_posts');
-    return savedPosts ? JSON.parse(savedPosts) : [];
-  });
-
+  // Cek token saat aplikasi pertama kali dimuat
   useEffect(() => {
-    localStorage.setItem('app_users', JSON.stringify(users));
-  }, [users]);
-
-  useEffect(() => {
-    localStorage.setItem('app_posts', JSON.stringify(posts));
-  }, [posts]);
-
-  useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem('app_currentUser', JSON.stringify(currentUser));
-    } else {
-      localStorage.removeItem('app_currentUser');
+    const token = localStorage.getItem('app_token');
+    if (token) {
+      try {
+        const decodedUser = jwtDecode(token);
+        // Cek apakah token sudah kedaluwarsa
+        if (decodedUser.exp * 1000 < Date.now()) {
+          handleLogout(); // Logout jika token expired
+        } else {
+          setCurrentUser(decodedUser); // Set user dari token
+        }
+      } catch (error) {
+        console.error("Token tidak valid:", error);
+        handleLogout(); // Logout jika token rusak/tidak valid
+      }
     }
-  }, [currentUser]);
+  }, []);
 
-  const handleRegister = (newUser) => {
-    if (users.find((user) => user.username === newUser.username)) {
-      alert('Username sudah digunakan!');
-      return false;
-    }
-    setUsers([...users, newUser]);
-    return true;
-  };
-
-  const handleLogin = (loginData) => {
-    const user = users.find(
-      (u) => u.username === loginData.username && u.password === loginData.password
-    );
-    if (user) {
-      setCurrentUser(user);
-      return true;
-    } else {
-      alert('Username atau password salah!');
-      return false;
-    }
+  // Fungsi ini dipanggil oleh LoginPage setelah login sukses
+  const handleLogin = (userData) => {
+    setCurrentUser(userData);
+    // Token sudah disimpan di localStorage oleh LoginPage
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('app_token');
     setCurrentUser(null);
   };
 
-  const handleCreatePost = (postData) => {
-    if (!currentUser) {
-      alert('Anda harus login untuk membuat post!');
-      return;
-    }
-
-    const newPost = {
-      id: Date.now(),
-      author: currentUser.username,
-      text: postData.text,
-      timestamp: new Date(),
-    };
-
-    setPosts([newPost, ...posts]);
-    console.log('Database posts:', [newPost, ...posts]);
-  };
+  // HAPUS: handleRegister (logika pindah ke RegisterPage)
+  // HAPUS: handleCreatePost (logika pindah ke DashboardPage)
+  // HAPUS: state users dan posts (data diambil oleh komponen masing-masing)
+  // HAPUS: useEffect untuk menyimpan state ke localStorage
 
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/register" element={<RegisterPage onRegister={handleRegister} />} />
+        <Route path="/register" element={<RegisterPage />} /> {/* Hapus prop onRegister */}
         <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
         <Route
           path="/dashboard"
@@ -94,22 +59,23 @@ function App() {
             <DashboardPage
               user={currentUser}
               onLogout={handleLogout}
-              onCreatePost={handleCreatePost}
-              posts={posts}
             />
           }
         />
         <Route
           path="/profile/:username"
-          element={<ProfilePage allPosts={posts} allUsers={users} />}
+          element={
+            <ProfilePage 
+              currentUser={currentUser} // <-- TAMBAHKAN INI
+              onUserUpdate={handleLogin} // <-- TAMBAHKAN INI (kita gunakan onLogin)
+            />
+          }
         />
         <Route
           path="/admin"
           element={
             <AdminDashboard
               currentUser={currentUser}
-              allUsers={users}
-              allPosts={posts}
               onLogout={handleLogout}
             />
           }

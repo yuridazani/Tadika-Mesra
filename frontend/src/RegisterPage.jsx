@@ -1,27 +1,42 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios'; // Impor axios
+import { API_URL } from './apiConfig'; // Impor URL API
 
-function RegisterPage({ onRegister }) {
+function RegisterPage() { // Hapus prop onRegister
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => { // Buat jadi async
     event.preventDefault();
     if (!username || !email || !password) {
       alert('Semua field harus diisi!');
       return;
     }
 
-    const success = onRegister({ username, email, password });
-    
-    if (success) {
+    try {
+      // Ganti logika onRegister dengan API call
+      await axios.post(`${API_URL}/auth/register`, {
+        username,
+        email,
+        password,
+      });
+      
       alert(`Registrasi untuk user ${username} berhasil! Silakan login.`);
-      navigate('/login'); 
+      navigate('/login');
+    } catch (error) {
+      console.error('Error registrasi:', error);
+      if (error.response && error.response.data) {
+        alert(`Registrasi Gagal: ${error.response.data.message}`);
+      } else {
+        alert('Registrasi Gagal. Coba lagi nanti.');
+      }
     }
   };
 
+  // ... (JSX sisanya sama persis)
   return (
     <div className="flex items-center justify-center min-h-screen font-lato bg-white-smoke">
       <div className="w-full max-w-md p-8 space-y-6 bg-white shadow-lg rounded-xl">
@@ -33,9 +48,9 @@ function RegisterPage({ onRegister }) {
             Mulai perjalananmu bersama kami.
           </p>
         </div>
-
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
+          {/* ... (Input fields sama) ... */}
+           <div>
             <label htmlFor="username" className="block text-sm font-semibold text-walnut-brown">
               Username
             </label>

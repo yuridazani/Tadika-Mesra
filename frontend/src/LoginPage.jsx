@@ -1,28 +1,50 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios'; // Impor axios
+import { API_URL } from './apiConfig'; // Impor URL API
 
-function LoginPage({ onLogin }) {
+function LoginPage({ onLogin }) { // Ambil prop onLogin dari App.jsx
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => { // Buat jadi async
     event.preventDefault();
     
     if (!username || !password) {
       alert('Username dan password harus diisi!');
       return;
     }
-    const success = onLogin({ username, password });
     
-  if (success) {
-      if (username === 'admin') {
-        navigate('/admin');
+    try {
+      // Panggil API untuk login
+      const response = await axios.post(`${API_URL}/auth/login`, {
+        username,
+        password,
+      });
+
+      // Backend mengirim 'token' dan 'user'
+      const { token, user } = response.data;
+      
+      // 1. Simpan token ke localStorage
+      localStorage.setItem('app_token', token);
+      
+      // 2. Kirim data user (termasuk is_admin) ke App.jsx
+      onLogin(user);
+
+      // 3. SELALU arahkan ke dashboard biasa
+      navigate('/dashboard');
+      
+    } catch (error) {
+      console.error('Error login:', error);
+      if (error.response && error.response.data) {
+        alert(`Login Gagal: ${error.response.data.message}`);
       } else {
-        navigate('/dashboard');
+        alert('Login Gagal. Coba lagi nanti.');
       }
     }
   };
+
   return (
     <div className="flex items-center justify-center min-h-screen font-lato bg-white-smoke">
       <div className="w-full max-w-md p-8 space-y-6 bg-white shadow-lg rounded-xl">

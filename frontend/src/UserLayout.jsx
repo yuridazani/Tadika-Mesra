@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, User } from 'lucide-react';
+// Impor 'Shield' (Perisai)
+import { LogOut, User, Shield } from 'lucide-react';
 
 function UserLayout({ user, onLogout, children }) {
   const navigate = useNavigate();
@@ -23,6 +24,19 @@ function UserLayout({ user, onLogout, children }) {
           </Link>
           
           <div className="flex items-center gap-6">
+            
+            {/* --- TOMBOL ADMIN BARU (KONDISIONAL) --- */}
+            {user.is_admin && (
+              <Link
+                to="/admin"
+                className="flex items-center gap-2 font-semibold transition-colors text-blue-600 hover:text-blue-800"
+              >
+                <Shield size={18} />
+                Admin Panel
+              </Link>
+            )}
+            {/* -------------------------------------- */}
+
             <Link
               to={`/profile/${user.username}`}
               className="flex items-center gap-2 font-semibold transition-colors text-walnut-brown hover:text-chocolate-cosmos"
