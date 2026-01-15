@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_URL } from './apiConfig';
-import { Trash2, Edit, X, Save } from 'lucide-react';
+import { Trash2, Edit, X, Save, Key, Mail, User } from 'lucide-react'; // Tambah icon Key, Mail, User
 
 function ProfilePage({ currentUser, onUserUpdate }) { 
   const { username } = useParams();
@@ -23,7 +23,6 @@ function ProfilePage({ currentUser, onUserUpdate }) {
 
   useEffect(() => {
     const fetchData = async () => {
-      // ... (fungsi fetchData Anda dari langkah sebelumnya SAMA PERSIS)
       try {
         setLoading(true);
         setError(null);
@@ -57,7 +56,7 @@ function ProfilePage({ currentUser, onUserUpdate }) {
     };
 
     fetchData();
-  }, [username, token]); // Tambahkan token sebagai dependensi
+  }, [username, token]); 
 
   const formatTimestamp = (date) => {
     return new Date(date).toLocaleString('id-ID', {
@@ -66,14 +65,12 @@ function ProfilePage({ currentUser, onUserUpdate }) {
     });
   };
 
-  // --- FUNGSI BARU UNTUK HAPUS POST ---
   const handleDeletePost = async (postId) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus postingan ini?')) {
       try {
         await axios.delete(`${API_URL}/posts/${postId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        // Update state di frontend
         setUserPosts(currentPosts => currentPosts.filter(post => post.id !== postId));
       } catch (error) {
         console.error('Gagal menghapus post:', error);
@@ -82,7 +79,6 @@ function ProfilePage({ currentUser, onUserUpdate }) {
     }
   };
 
-  // --- FUNGSI BARU UNTUK EDIT PROFIL ---
   const handleEditChange = (e) => {
     setEditData({ ...editData, [e.target.name]: e.target.value });
   };
@@ -90,7 +86,6 @@ function ProfilePage({ currentUser, onUserUpdate }) {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     
-    // Kirim data. Jika password kosong, jangan dimasukkan
     const dataToSubmit = {
       username: editData.username,
       email: editData.email,
@@ -106,16 +101,11 @@ function ProfilePage({ currentUser, onUserUpdate }) {
       
       const { token: newToken, user: updatedUser } = response.data;
 
-      // 1. Update token di localStorage
       localStorage.setItem('app_token', newToken);
-      // 2. Update state di App.jsx
       onUserUpdate(updatedUser);
-      // 3. Update state lokal di halaman ini
       setProfileUser(updatedUser);
-      // 4. Keluar dari mode edit
       setIsEditing(false);
 
-      // 5. Penting: Jika username berubah, navigasi ke URL baru
       if (username !== updatedUser.username) {
         navigate(`/profile/${updatedUser.username}`);
       }
@@ -129,7 +119,8 @@ function ProfilePage({ currentUser, onUserUpdate }) {
   if (loading) {
      return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-white-smoke">
-        <h1 className="text-4xl font-bold font-playfair text-chocolate-cosmos">Memuat Profil...</h1>
+        <div className="w-16 h-16 mb-4 border-4 border-dashed rounded-full border-chocolate-cosmos animate-spin"></div>
+        <h1 className="text-2xl font-bold font-playfair text-chocolate-cosmos">Memuat Profil...</h1>
       </div>
     );
   }
@@ -138,7 +129,6 @@ function ProfilePage({ currentUser, onUserUpdate }) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-white-smoke">
         <h1 className="text-4xl font-bold font-playfair text-chocolate-cosmos">User Not Found</h1>
-        {/* Tampilkan pesan error yang lebih spesifik */}
         <p className="mt-2 text-walnut-brown">
           Profil untuk "{username}" tidak dapat ditemukan. {error}
         </p>
@@ -151,119 +141,185 @@ function ProfilePage({ currentUser, onUserUpdate }) {
 
   return (
     <div className="min-h-screen bg-white-smoke font-lato">
-      <header className="p-6 bg-white shadow-md">
-        <div className="max-w-4xl mx-auto">
-          <Link to="/dashboard" className="text-sm font-semibold text-chocolate-cosmos hover:underline">
+      {/* HEADER SECTION */}
+      <header className="bg-white shadow-md">
+        <div className="max-w-4xl p-6 mx-auto">
+          <Link to="/dashboard" className="text-sm font-semibold transition-colors text-walnut-brown hover:text-chocolate-cosmos">
             &larr; Kembali ke Dashboard
           </Link>
           
-          {/* --- TAMPILKAN FORM EDIT JIKA isEditing --- */}
+          {/* --- TAMPILAN FORM EDIT (RE-DESIGNED) --- */}
           {isEditing ? (
-            <form onSubmit={handleEditSubmit} className="mt-4 space-y-3">
-              <div>
-                <label className="text-sm font-semibold">Username</label>
-                <input
-                  type="text"
-                  name="username"
-                  value={editData.username}
-                  onChange={handleEditChange}
-                  className="w-full px-3 py-2 border rounded-md"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-semibold">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={editData.email}
-                  onChange={handleEditChange}
-                  className="w-full px-3 py-2 border rounded-md"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-semibold">Password Baru (Kosongkan jika tidak ingin ganti)</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={editData.password}
-                  onChange={handleEditChange}
-                  className="w-full px-3 py-2 border rounded-md"
-                  placeholder="••••••••"
-                />
-              </div>
-              <div className="flex gap-4">
-                <button type="submit" className="flex items-center gap-2 px-4 py-2 font-bold text-white bg-green-600 rounded-md hover:bg-green-700">
-                  <Save size={18} /> Simpan
-                </button>
-                <button type="button" onClick={() => setIsEditing(false)} className="flex items-center gap-2 px-4 py-2 font-semibold bg-gray-200 rounded-md hover:bg-gray-300">
-                  <X size={18} /> Batal
+            <div className="mt-6 animate-fade-in-down">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold font-playfair text-chocolate-cosmos">Edit Profil</h2>
+                <button onClick={() => setIsEditing(false)} className="text-walnut-brown hover:text-red-600 transition-colors">
+                  <X size={24} />
                 </button>
               </div>
-            </form>
+
+              <form onSubmit={handleEditSubmit} className="p-6 border rounded-xl bg-white-smoke/50 border-beaver/20">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  
+                  {/* Input Username */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-walnut-brown flex items-center gap-2">
+                      <User size={14}/> Username
+                    </label>
+                    <input
+                      type="text"
+                      name="username"
+                      value={editData.username}
+                      onChange={handleEditChange}
+                      className="w-full px-4 py-3 bg-white border border-beaver/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-chocolate-cosmos/20 focus:border-chocolate-cosmos transition-all text-black-custom placeholder-walnut-brown/50"
+                      placeholder="Username baru"
+                    />
+                  </div>
+
+                  {/* Input Email */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-walnut-brown flex items-center gap-2">
+                      <Mail size={14}/> Email
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={editData.email}
+                      onChange={handleEditChange}
+                      className="w-full px-4 py-3 bg-white border border-beaver/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-chocolate-cosmos/20 focus:border-chocolate-cosmos transition-all text-black-custom placeholder-walnut-brown/50"
+                      placeholder="Email baru"
+                    />
+                  </div>
+
+                  {/* Input Password (Full Width) */}
+                  <div className="md:col-span-2 space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-walnut-brown flex items-center gap-2">
+                      <Key size={14}/> Password Baru <span className="text-[10px] font-normal normal-case text-walnut-brown/60">(Kosongkan jika tidak ingin mengganti)</span>
+                    </label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={editData.password}
+                      onChange={handleEditChange}
+                      className="w-full px-4 py-3 bg-white border border-beaver/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-chocolate-cosmos/20 focus:border-chocolate-cosmos transition-all text-black-custom placeholder-walnut-brown/50"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                </div>
+
+                {/* Buttons Action */}
+                <div className="flex justify-end gap-3 mt-8">
+                  <button 
+                    type="button" 
+                    onClick={() => setIsEditing(false)} 
+                    className="px-6 py-2 font-bold text-walnut-brown transition-colors border border-walnut-brown/30 rounded-full hover:bg-walnut-brown/10 hover:text-chocolate-cosmos"
+                  >
+                    Batal
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="flex items-center gap-2 px-6 py-2 font-bold text-white transition-transform transform bg-chocolate-cosmos rounded-full hover:scale-105 shadow-md"
+                  >
+                    <Save size={18} /> Simpan Perubahan
+                  </button>
+                </div>
+              </form>
+            </div>
           ) : (
-            <>
-              {/* --- TAMPILKAN INFO PROFIL JIKA TIDAK MENGEDIT --- */}
-              <div className="flex items-center justify-between mt-4">
-                <h1 className="text-5xl font-bold font-playfair text-chocolate-cosmos">
+            /* --- TAMPILAN NORMAL (INFO PROFIL) --- */
+            <div className="flex flex-col md:flex-row md:items-center justify-between mt-6 gap-4">
+              <div>
+                <h1 className="text-5xl md:text-6xl font-bold font-playfair text-chocolate-cosmos">
                   {profileUser.username}
                 </h1>
-                {/* Tampilkan Tombol Edit HANYA jika Anda pemilik profil */}
-                {isOwner && (
-                  <button 
-                    onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-2 px-4 py-2 font-semibold transition-colors bg-white-smoke rounded-md text-walnut-brown hover:bg-beaver/30"
-                  >
-                    <Edit size={18} /> Edit Profil
-                  </button>
+                <p className="mt-2 text-xl text-walnut-brown flex items-center gap-2">
+                  <Mail size={18} className="text-beaver"/> {profileUser.email}
+                </p>
+                {profileUser.is_admin && (
+                  <span className="inline-block mt-2 px-3 py-1 text-xs font-bold text-white bg-beaver rounded-full">
+                    ADMIN
+                  </span>
                 )}
               </div>
-              <p className="text-lg text-walnut-brown">{profileUser.email}</p>
-            </>
+
+              {/* Tampilkan Tombol Edit HANYA jika Anda pemilik profil */}
+              {isOwner && (
+                <button 
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center justify-center gap-2 px-6 py-3 font-bold transition-all border-2 border-chocolate-cosmos text-chocolate-cosmos rounded-full hover:bg-chocolate-cosmos hover:text-white"
+                >
+                  <Edit size={20} /> Edit Profil
+                </button>
+              )}
+            </div>
           )}
         </div>
       </header>
       
+      {/* POST LIST */}
       <main className="max-w-4xl p-4 mx-auto md:p-8">
-        <h2 className="text-2xl font-bold text-walnut-brown">
-          Semua Postingan ({userPosts.length})
-        </h2>
-        <div className="mt-4 space-y-6">
+        <div className="flex items-center gap-4 mb-6">
+          <h2 className="text-2xl font-bold text-walnut-brown font-playfair">
+            Postingan
+          </h2>
+          <span className="px-3 py-1 text-sm font-bold text-white bg-beaver rounded-full">
+            {userPosts.length}
+          </span>
+        </div>
+
+        <div className="space-y-6">
           {userPosts.length > 0 ? (
             userPosts.map((post) => (
-              <div key={post.id} className="relative p-5 bg-white shadow-lg rounded-xl">
+              <div key={post.id} className="relative p-6 bg-white border border-transparent shadow-lg rounded-xl hover:border-beaver/20 transition-all">
                 
-                {/* --- TOMBOL HAPUS (HANYA UNTUK PEMILIK) --- */}
+                {/* --- TOMBOL HAPUS --- */}
                 {isOwner && (
                   <button
                     onClick={() => handleDeletePost(post.id)}
-                    className="absolute top-3 right-3 p-1 text-walnut-brown/50 hover:text-red-600 hover:bg-red-100 rounded-full"
+                    className="absolute top-4 right-4 p-2 text-walnut-brown/40 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
                     title="Hapus postingan"
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={20} />
                   </button>
                 )}
 
-                <div className="mb-3 text-sm text-walnut-brown/70">
-                  Diposting pada {formatTimestamp(post.created_at)}
+                <div className="flex items-center gap-3 mb-4">
+                  {/* Avatar Mini (Inisial) */}
+                  <div className="flex items-center justify-center w-10 h-10 font-bold text-white rounded-full bg-beaver shrink-0">
+                    {post.author.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <span className="block font-bold text-chocolate-cosmos leading-tight">{post.author}</span>
+                    <span className="text-xs text-walnut-brown/70">
+                      {formatTimestamp(post.created_at)}
+                    </span>
+                  </div>
                 </div>
+
                 {post.text_content && (
-                  <p className="text-lg text-black-custom">{post.text_content}</p>
+                  <p className="text-lg leading-relaxed text-black-custom whitespace-pre-wrap pl-1">{post.text_content}</p>
                 )}
+                
                 {post.image_url && (
-                    <div className="mt-4">
+                    <div className="mt-4 overflow-hidden rounded-lg border border-white-smoke">
                       <img
                         src={post.image_url}
                         alt="Lampiran post"
-                        className="object-contain w-full h-auto bg-gray-100 rounded-lg max-h-96"
+                        className="object-contain w-full h-auto max-h-[500px] bg-gray-50"
                       />
                     </div>
                 )}
               </div>
             ))
           ) : (
-            <p className="py-10 text-center text-walnut-brown/80">
-              {username} belum memiliki postingan.
-            </p>
+            <div className="flex flex-col items-center justify-center py-16 text-center bg-white border-2 border-dashed rounded-xl border-beaver/20">
+              <p className="text-lg font-semibold text-walnut-brown">Belum ada postingan.</p>
+              {isOwner && (
+                <Link to="/dashboard" className="mt-2 text-chocolate-cosmos hover:underline">
+                  Mulai membuat postingan baru &rarr;
+                </Link>
+              )}
+            </div>
           )}
         </div>
       </main>

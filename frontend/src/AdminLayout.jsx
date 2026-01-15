@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// Impor icon 'LayoutDashboard'
 import { LogOut, Shield, LayoutDashboard } from 'lucide-react';
 
 function AdminLayout({ user, onLogout, children }) {

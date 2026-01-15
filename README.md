@@ -1,16 +1,156 @@
-# React + Vite
+# Project-Based Learning (PBL0101)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Web-based App Development  
+**Odd Semester 2025/2026**  
+**Class PABW7A2-GS2526**  
+Presented by **Team Tadika Mesra**
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Kode Tugas
+**PBL0101**
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Nama Kelompok
+**Tadika Mesra**
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Anggota Kelompok
+| NIM | Nama |
+|----|------|
+| 221080200001 | Yurida Zani |
+| 221080200018 | Aulia Zamaira |
+| 221080200030 | Muhammad Dwiki Ramadani |
+| 221080200048 | Dimas Hammam Abdillah |
+| 221080200067 | Ali Sofyan |
+
+---
+
+## Framework & Teknologi yang Digunakan
+
+### Frontend
+- **React.js**  
+- **Vite** (development server & build tool)
+
+### Backend
+- **Node.js**
+- **Express.js**
+
+### Database
+- **SQLite**
+
+Framework pilihan sesuai daftar:
+- **JavaScript – React – 3**
+- **JavaScript – Express – 4**
+
+---
+
+## Deskripsi Aplikasi
+Aplikasi **Tadika Mesra** merupakan web-based application yang dikembangkan dalam rangka memenuhi tugas **Project-Based Learning (PBL0101)** pada mata kuliah **Web-based App Development**.
+
+Aplikasi ini menggunakan:
+- React.js untuk tampilan antarmuka pengguna (frontend)
+- Express.js sebagai REST API (backend)
+- SQLite sebagai database ringan dan mudah digunakan untuk lingkungan pembelajaran
+
+---
+
+## Struktur Proyek (Ringkas)
+
+```
+
+project-root/
+│
+├── client/          # Frontend (React + Vite)
+│   ├── src/
+│   └── package.json
+│
+├── server/          # Backend (Express)
+│   ├── database/
+│   │   └── tadika.db
+│   ├── routes/
+│   ├── index.js
+│   └── package.json
+│
+└── README.md
+
+```
+
+---
+
+## Akun Admin (Default)
+
+Akun admin **sudah disiapkan secara default** untuk keperluan pengujian aplikasi.
+
+```
+
+Username : admin
+Password : admin123
+
+````
+
+> ⚠️ Akun ini digunakan **hanya untuk kebutuhan tugas PBL dan demo aplikasi**, bukan untuk produksi.
+
+---
+
+## Mekanisme Login Admin
+1. User membuka halaman login
+2. Admin memasukkan **username** dan **password**
+3. Data dikirim ke backend (Express)
+4. Backend melakukan validasi ke database SQLite
+5. Jika valid → admin diarahkan ke **dashboard admin**
+
+---
+
+## Cara Menjalankan Aplikasi
+
+### 1. Menjalankan Backend
+```bash
+cd server
+npm install
+node index.js
+````
+
+Backend berjalan di:
+
+```
+http://localhost:5000
+```
+
+---
+
+### 2. Menjalankan Frontend
+
+```bash
+cd client
+npm install
+npm run dev
+```
+
+Frontend berjalan di:
+
+```
+http://localhost:5173
+```
+
+---
+
+## Catatan Tambahan
+
+* Project ini **bukan hanya template React + Vite**
+* Template bawaan Vite digunakan **sebagai dasar**, lalu dikembangkan dengan:
+
+  * Sistem login
+  * Backend Express
+  * Database SQLite
+* Seluruh konfigurasi disesuaikan dengan kebutuhan **PBL0101**
+
+---
+
+## Penutup
+
+Proyek **Tadika Mesra** dikembangkan sebagai bentuk implementasi pembelajaran berbasis proyek untuk meningkatkan pemahaman mahasiswa dalam pengembangan aplikasi web modern menggunakan React dan Express.
+
+
