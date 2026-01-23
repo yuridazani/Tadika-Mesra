@@ -29,18 +29,6 @@ Presented by **Team Tadika Mesra**
 ---
 
 ## Framework & Teknologi yang Digunakan
-
-### Frontend
-- **React.js**  
-- **Vite** (development server & build tool)
-
-### Backend
-- **Node.js**
-- **Express.js**
-
-### Database
-- **SQLite**
-
 Framework pilihan sesuai daftar:
 - **JavaScript – React – 3**
 - **JavaScript – Express – 4**
@@ -57,29 +45,6 @@ Aplikasi ini menggunakan:
 
 ---
 
-## Struktur Proyek (Ringkas)
-
-```
-
-project-root/
-│
-├── client/          # Frontend (React + Vite)
-│   ├── src/
-│   └── package.json
-│
-├── server/          # Backend (Express)
-│   ├── database/
-│   │   └── tadika.db
-│   ├── routes/
-│   ├── index.js
-│   └── package.json
-│
-└── README.md
-
-```
-
----
-
 ## Akun Admin (Default)
 
 Akun admin **sudah disiapkan secara default** untuk keperluan pengujian aplikasi.
@@ -88,19 +53,6 @@ Akun admin **sudah disiapkan secara default** untuk keperluan pengujian aplikasi
 
 Username : admin
 Password : admin123
-
-````
-
-> ⚠️ Akun ini digunakan **hanya untuk kebutuhan tugas PBL dan demo aplikasi**, bukan untuk produksi.
-
----
-
-## Mekanisme Login Admin
-1. User membuka halaman login
-2. Admin memasukkan **username** dan **password**
-3. Data dikirim ke backend (Express)
-4. Backend melakukan validasi ke database SQLite
-5. Jika valid → admin diarahkan ke **dashboard admin**
 
 ---
 
@@ -137,20 +89,5 @@ http://localhost:5173
 
 ---
 
-## Catatan Tambahan
-
-* Project ini **bukan hanya template React + Vite**
-* Template bawaan Vite digunakan **sebagai dasar**, lalu dikembangkan dengan:
-
-  * Sistem login
-  * Backend Express
-  * Database SQLite
-* Seluruh konfigurasi disesuaikan dengan kebutuhan **PBL0101**
-
----
-
-## Penutup
-
-Proyek **Tadika Mesra** dikembangkan sebagai bentuk implementasi pembelajaran berbasis proyek untuk meningkatkan pemahaman mahasiswa dalam pengembangan aplikasi web modern menggunakan React dan Express.
 
 
