@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import UserLayout from './UserLayout';
 import axios from 'axios';
-import { API_URL } from './apiConfig'; 
+// 👇 UPDATE IMPORT: Tambahkan BASE_URL
+import { API_URL, BASE_URL } from './apiConfig'; 
 import { io } from "socket.io-client"; 
 
 const Avatar = ({ username }) => {
@@ -27,18 +28,14 @@ function DashboardPage({ user, onLogout }) {
     if (!user) {
       navigate('/login');
     } 
-    // --- 👇 TAMBAHAN KODE DI SINI 👇 ---
     else if (user.is_admin) {
-      // Jika user adalah admin, "usir" mereka ke panel admin.
-      // Dashboard ini hanya untuk user biasa.
       navigate('/admin');
     } 
-    // --- 👆 AKHIR TAMBAHAN 👆 ---
     else {
       setLoading(true); 
       fetchPosts();
     }
-  }, [user, navigate]); // user dan navigate sudah ada di dependencies
+  }, [user, navigate]); 
 
   // Efek 2: Koneksi Socket.io
   useEffect(() => {
@@ -61,7 +58,6 @@ function DashboardPage({ user, onLogout }) {
     };
   }, [user]); 
 
-  // Fungsi ambil data awal
   const fetchPosts = async () => {
     try {
       const response = await axios.get(`${API_URL}/posts`);
@@ -73,7 +69,6 @@ function DashboardPage({ user, onLogout }) {
     }
   };
 
-  // Fungsi kirim post (tidak ada perubahan)
   const handlePostSubmit = async (event) => {
     event.preventDefault();
     if (!postText.trim() && !postImage) {
@@ -100,11 +95,7 @@ function DashboardPage({ user, onLogout }) {
     }
   };
 
-  // --- 👇 TAMBAHAN KODE DI SINI 👇 ---
-  // Jika user adalah admin, component akan redirect, 
-  // jadi kita return null lebih awal agar tidak render sisanya.
   if (!user || user.is_admin) return null; 
-  // --- 👆 AKHIR TAMBAHAN 👆 ---
 
   const formatTimestamp = (date) =>
     new Date(date).toLocaleString('id-ID', {
@@ -186,7 +177,7 @@ function DashboardPage({ user, onLogout }) {
                   {post.image_url && (
                     <div className="mt-4">
                       <img
-                        src={post.image_url}
+                        src={`${BASE_URL}${post.image_url}`}
                         alt="Lampiran post"
                         className="object-contain w-full h-auto bg-gray-100 rounded-lg max-h-96"
                       />

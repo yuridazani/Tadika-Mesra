@@ -2,12 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import AdminLayout from './AdminLayout';
 import axios from 'axios';
-import { API_URL } from './apiConfig'; 
+import { API_URL, BASE_URL } from './apiConfig'; 
 import { Trash2, Edit, X, Save } from 'lucide-react'; 
 import { io } from "socket.io-client"; 
 
-// --- 👇 TAMBAHAN BARU: Komponen Avatar 👇 ---
-// Kita copy dari DashboardPage.jsx
 const Avatar = ({ username }) => {
   const initial = username ? username.charAt(0).toUpperCase() : '?';
   return (
@@ -16,10 +14,7 @@ const Avatar = ({ username }) => {
     </div>
   );
 };
-// --- 👆 AKHIR TAMBAHAN 👆 ---
 
-
-// --- Komponen Modal Edit User (Tidak ada perubahan) ---
 const EditUserModal = ({ user, onClose, onUserUpdated }) => {
   const [formData, setFormData] = useState({
     username: user.username,
@@ -57,7 +52,6 @@ const EditUserModal = ({ user, onClose, onUserUpdated }) => {
   };
 
   return (
-    // ... JSX Modal tidak berubah ...
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-xl">
         <div className="flex items-center justify-between mb-4">
@@ -135,7 +129,6 @@ const EditUserModal = ({ user, onClose, onUserUpdated }) => {
     </div>
   );
 };
-// --- Akhir Komponen Modal ---
 
 
 function AdminDashboard({ currentUser, onLogout }) { 
@@ -147,11 +140,9 @@ function AdminDashboard({ currentUser, onLogout }) {
   const [editingUser, setEditingUser] = useState(null); 
   const token = localStorage.getItem('app_token'); 
 
-  // --- State untuk form post ---
   const [postText, setPostText] = useState('');
   const [postImage, setPostImage] = useState(null);
 
-  // Efek untuk mengambil data awal (HTTP)
   useEffect(() => {
     if (!currentUser || !currentUser.is_admin) {
       navigate('/dashboard');
@@ -161,7 +152,6 @@ function AdminDashboard({ currentUser, onLogout }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser, navigate]);
 
-  // Efek untuk koneksi real-time (WebSocket)
   useEffect(() => {
     if (!currentUser) return; 
 
@@ -195,7 +185,6 @@ function AdminDashboard({ currentUser, onLogout }) {
     }
   };
 
-  // --- Fungsi submit post ---
   const handlePostSubmit = async (event) => {
     event.preventDefault();
     if (!postText.trim() && !postImage) {
@@ -285,15 +274,12 @@ function AdminDashboard({ currentUser, onLogout }) {
       {loading ? (
         <p className="text-center text-walnut-brown">Memuat data admin...</p>
       ) : (
-        // --- 👇 PERUBAHAN DI SINI: Kembali ke grid 2 kolom 👇 ---
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
-          {/* --- KOLOM KIRI (ADMIN) --- */}
           <div className="p-6 bg-white rounded-xl shadow-lg">
             <h2 className="text-2xl font-bold text-walnut-brown">
               Daftar Semua User ({allUsers.length})
             </h2>
-            {/* --- 👇 PERBAIKAN SCROLL: Tambahkan max-h & overflow 👇 --- */}
             <ul className="mt-4 space-y-3 max-h-[70vh] overflow-y-auto pr-2">
               {allUsers.map((user) => (
                 <li
@@ -333,7 +319,6 @@ function AdminDashboard({ currentUser, onLogout }) {
 
           <div className="flex flex-col gap-8">
             
-            {/* --- Form Postingan Admin --- */}
             <div className="p-6 bg-white shadow-lg rounded-xl">
               <h2 className="text-2xl font-bold text-walnut-brown mb-4">
                 Buat Postingan / Pengumuman
@@ -372,12 +357,10 @@ function AdminDashboard({ currentUser, onLogout }) {
               </div>
             </div>
 
-            {/* --- Panel Timeline Semua Postingan --- */}
             <div className="p-6 bg-white rounded-xl shadow-lg">
               <h2 className="text-2xl font-bold text-walnut-brown">
                 Semua Postingan ({allPosts.length})
               </h2>
-              {/* --- 👇 PERBAIKAN SCROLL: Pastikan max-h ada di sini 👇 --- */}
               <div className="mt-4 space-y-4 max-h-[70vh] overflow-y-auto pr-2">
                 {allPosts.map((post) => (
                   <div
@@ -411,7 +394,7 @@ function AdminDashboard({ currentUser, onLogout }) {
                     {post.image_url && (
                       <div className="mt-2">
                         <img
-                          src={post.image_url}
+                          src={`${BASE_URL}${post.image_url}`}
                           alt="Lampiran post"
                           className="object-contain w-full h-auto bg-gray-100 rounded-lg max-h-60"
                         />
@@ -422,7 +405,6 @@ function AdminDashboard({ currentUser, onLogout }) {
               </div>
             </div>
           </div>
-          {/* --- AKHIR KOLOM KANAN --- */}
         </div>
       )}
     </AdminLayout>

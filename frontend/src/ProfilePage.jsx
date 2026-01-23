@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { API_URL } from './apiConfig';
-import { Trash2, Edit, X, Save, Key, Mail, User } from 'lucide-react'; // Tambah icon Key, Mail, User
+// 👇 UPDATE IMPORT
+import { API_URL, BASE_URL } from './apiConfig';
+import { Trash2, Edit, X, Save, Key, Mail, User } from 'lucide-react'; 
 
 function ProfilePage({ currentUser, onUserUpdate }) { 
   const { username } = useParams();
@@ -13,11 +14,9 @@ function ProfilePage({ currentUser, onUserUpdate }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // State untuk mode editing
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({ username: '', email: '', password: '' });
 
-  // Cek apakah user yang login adalah pemilik profil ini
   const isOwner = currentUser?.username === username;
   const token = localStorage.getItem('app_token');
 
@@ -31,11 +30,10 @@ function ProfilePage({ currentUser, onUserUpdate }) {
            headers: { 'Authorization': `Bearer ${token}` }
         });
         setProfileUser(userResponse.data); 
-        // Set data untuk form edit
         setEditData({ 
           username: userResponse.data.username, 
           email: userResponse.data.email, 
-          password: '' // Kosongkan password
+          password: '' 
         });
 
         const postsResponse = await axios.get(`${API_URL}/posts`);
@@ -141,14 +139,12 @@ function ProfilePage({ currentUser, onUserUpdate }) {
 
   return (
     <div className="min-h-screen bg-white-smoke font-lato">
-      {/* HEADER SECTION */}
       <header className="bg-white shadow-md">
         <div className="max-w-4xl p-6 mx-auto">
           <Link to="/dashboard" className="text-sm font-semibold transition-colors text-walnut-brown hover:text-chocolate-cosmos">
             &larr; Kembali ke Dashboard
           </Link>
           
-          {/* --- TAMPILAN FORM EDIT (RE-DESIGNED) --- */}
           {isEditing ? (
             <div className="mt-6 animate-fade-in-down">
               <div className="flex items-center justify-between mb-4">
@@ -161,7 +157,6 @@ function ProfilePage({ currentUser, onUserUpdate }) {
               <form onSubmit={handleEditSubmit} className="p-6 border rounded-xl bg-white-smoke/50 border-beaver/20">
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   
-                  {/* Input Username */}
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-wider text-walnut-brown flex items-center gap-2">
                       <User size={14}/> Username
@@ -176,7 +171,6 @@ function ProfilePage({ currentUser, onUserUpdate }) {
                     />
                   </div>
 
-                  {/* Input Email */}
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-wider text-walnut-brown flex items-center gap-2">
                       <Mail size={14}/> Email
@@ -191,7 +185,6 @@ function ProfilePage({ currentUser, onUserUpdate }) {
                     />
                   </div>
 
-                  {/* Input Password (Full Width) */}
                   <div className="md:col-span-2 space-y-2">
                     <label className="text-xs font-bold uppercase tracking-wider text-walnut-brown flex items-center gap-2">
                       <Key size={14}/> Password Baru <span className="text-[10px] font-normal normal-case text-walnut-brown/60">(Kosongkan jika tidak ingin mengganti)</span>
@@ -207,7 +200,6 @@ function ProfilePage({ currentUser, onUserUpdate }) {
                   </div>
                 </div>
 
-                {/* Buttons Action */}
                 <div className="flex justify-end gap-3 mt-8">
                   <button 
                     type="button" 
@@ -226,7 +218,6 @@ function ProfilePage({ currentUser, onUserUpdate }) {
               </form>
             </div>
           ) : (
-            /* --- TAMPILAN NORMAL (INFO PROFIL) --- */
             <div className="flex flex-col md:flex-row md:items-center justify-between mt-6 gap-4">
               <div>
                 <h1 className="text-5xl md:text-6xl font-bold font-playfair text-chocolate-cosmos">
@@ -242,7 +233,6 @@ function ProfilePage({ currentUser, onUserUpdate }) {
                 )}
               </div>
 
-              {/* Tampilkan Tombol Edit HANYA jika Anda pemilik profil */}
               {isOwner && (
                 <button 
                   onClick={() => setIsEditing(true)}
@@ -256,7 +246,6 @@ function ProfilePage({ currentUser, onUserUpdate }) {
         </div>
       </header>
       
-      {/* POST LIST */}
       <main className="max-w-4xl p-4 mx-auto md:p-8">
         <div className="flex items-center gap-4 mb-6">
           <h2 className="text-2xl font-bold text-walnut-brown font-playfair">
@@ -272,7 +261,6 @@ function ProfilePage({ currentUser, onUserUpdate }) {
             userPosts.map((post) => (
               <div key={post.id} className="relative p-6 bg-white border border-transparent shadow-lg rounded-xl hover:border-beaver/20 transition-all">
                 
-                {/* --- TOMBOL HAPUS --- */}
                 {isOwner && (
                   <button
                     onClick={() => handleDeletePost(post.id)}
@@ -284,7 +272,6 @@ function ProfilePage({ currentUser, onUserUpdate }) {
                 )}
 
                 <div className="flex items-center gap-3 mb-4">
-                  {/* Avatar Mini (Inisial) */}
                   <div className="flex items-center justify-center w-10 h-10 font-bold text-white rounded-full bg-beaver shrink-0">
                     {post.author.charAt(0).toUpperCase()}
                   </div>
@@ -302,8 +289,9 @@ function ProfilePage({ currentUser, onUserUpdate }) {
                 
                 {post.image_url && (
                     <div className="mt-4 overflow-hidden rounded-lg border border-white-smoke">
+                      {/* 👇 PERBAIKAN: Gunakan BASE_URL */}
                       <img
-                        src={post.image_url}
+                        src={`${BASE_URL}${post.image_url}`}
                         alt="Lampiran post"
                         className="object-contain w-full h-auto max-h-[500px] bg-gray-50"
                       />

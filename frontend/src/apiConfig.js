@@ -1,2 +1,2 @@
-// Kita asumsikan backend berjalan di port 4000
 export const API_URL = '/api';
+export const BASE_URL = 'http://localhost:4000';
